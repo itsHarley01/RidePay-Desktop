@@ -6,10 +6,11 @@ import {
   XMarkIcon,
   ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
-import { useNavigate } from "react-router-dom"; // ✅ import navigation hook
+import { useNavigate } from "react-router-dom"; 
 import GeneralSettings from "./GeneralSettings";
 import NotificationSettings from "./NotificationSettings";
 import AccountSettings from "./AccountSettings";
+import { logout } from "../../utils/auth"; 
 
 export default function AppSettings({ onClose }: { onClose: () => void }) {
   const navigate = useNavigate(); // ✅ create navigate instance
@@ -29,8 +30,7 @@ export default function AppSettings({ onClose }: { onClose: () => void }) {
   };
 
   const handleLogout = () => {
-    // 🔐 Clear auth data here if needed (e.g. localStorage.clear())
-    // 🔄 Navigate to login page
+    logout(); 
     navigate("/");
   };
 

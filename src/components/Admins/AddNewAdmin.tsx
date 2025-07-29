@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaTimes, FaEnvelope, FaPhone } from 'react-icons/fa';
+import { registerAdmin } from '../../api/registerAdminApi';
 
 
 interface Admin {
@@ -11,7 +12,7 @@ interface Admin {
   phone: string;
   organization: string;
   role: string;
-  status: 'pending' | 'approved' | 'running' | 'deactivated';
+  status: 'pending' | 'approved' | 'activated' | 'deactivated';
 }
 
 interface Props {
@@ -29,57 +30,95 @@ const AddNewAdmin: React.FC<Props> = ({ isOpen, onClose, onSubmit }) => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [organization, setOrganization] = useState('Not yet assigned');
-  const [role, setRole] = useState('Admin');
+  const [role, setRole] = useState('');
+  const loggedInRole = localStorage.getItem('role');
+
+
 
   const organizationOptions = [
-    { label: 'Assign Later', value: 'not yet assigned' },
+    { label: 'Assign Later', value: 'Not yet assigned' },
     { label: 'Organization 1', value: 'Organization 1' },
     { label: 'Organization 2', value: 'Organization 2' },
     { label: 'Organization 3', value: 'Organization 3' },
   ];
 
-  const roleOptions = [
-    'Admin', 
-    'Super Admin',
-    'Admin Transport Cooperative',
-    'Admin Operator',
-    'HR',
-    'Driver',
-    'Accountant',
-  ];
+  const roleOptions = loggedInRole === 'super-admin'
+    ? [
+        { label: 'Super Admin', value: 'super-admin' },
+        { label: 'Admin Transport Cooperative', value: 'admin-transport-cooperative' },
+        { label: 'Admin Operator', value: 'admin-operator' },
+      ]
+    : [
+        { label: 'Admin Operator', value: 'admin-operator' },
+      ];
 
 
-  if (!isOpen) return null;
+    useEffect(() => {
+    if (isOpen) {
+      setFirstName('');
+      setMiddleName('');
+      setLastName('');
+      setBirthdate('');
+      setGender('');
+      setEmail('');
+      setPhone('');
+      setOrganization('Not yet assigned');
+      setRole('');
+    }
+  }, [isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newAdmin: Admin = {
-      id: `ADM-${Date.now()}`,
-      name: `${lastName}, ${firstName}${middleName ? ' ' + middleName : ''}`,
+
+    const adminData = {
+      firstName,
+      middleName,
+      lastName,
       birthdate,
       gender,
       email,
-      phone,
-      organization,
+      contactNumber: phone,
       role,
-      status: 'pending', // default status
+      organization
     };
 
-    onSubmit(newAdmin);
+    try {
+      // 🔥 Call backend API here
+      await registerAdmin(adminData);
+      console.log('✅ Admin registered successfully');
 
-    // ✅ Clear form fields after submit
-    setFirstName('');
-    setMiddleName('');
-    setLastName('');
-    setBirthdate('');
-    setGender('');
-    setEmail('');
-    setPhone('');
-    setOrganization('');
-    setRole('');
+      // Optional: call parent handler to update UI
+      onSubmit({
+        id: `ADM-${Date.now()}`,
+        name: `${lastName}, ${firstName}${middleName ? ' ' + middleName : ''}`,
+        birthdate,
+        gender,
+        email,
+        phone,
+        organization,
+        role,
+        status: 'pending',
+      });
 
-    onClose(); // optional: close panel after submit
+      // Clear form fields
+      setFirstName('');
+      setMiddleName('');
+      setLastName('');
+      setBirthdate('');
+      setGender('');
+      setEmail('');
+      setPhone('');
+      setOrganization('');
+      setRole('');
+
+      onClose();
+    } catch (error: any) {
+      console.error('❌ Failed to register admin:', error.response?.data || error.message);
+      alert(error.response?.data?.message || 'Something went wrong while adding admin.');
+    }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -240,8 +279,8 @@ const AddNewAdmin: React.FC<Props> = ({ isOpen, onClose, onSubmit }) => {
                   required
                 >
                   {roleOptions.map((r, index) => (
-                    <option key={index} value={r}>
-                      {r}
+                    <option key={index} value={r.value}>
+                      {r.label}
                     </option>
                   ))}
                 </select>

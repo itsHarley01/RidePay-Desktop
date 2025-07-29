@@ -2,11 +2,11 @@
 import React from 'react';
 
 const adminList = [
-  { name: "Juan dela Cruz", role: "Human Resources", avatar: "🧑‍💼" },
-  { name: "Blandin Son", role: "Cashier", avatar: "👨‍💻" },
-  { name: "Chrysler Mc", role: "Cashier", avatar: "👩‍💻" },
-  { name: "John Harley", role: "Accountant", avatar: "🧑‍💼" },
-  { name: "Imo mama", role: "Accountant", avatar: "👨‍💼" },
+  // { name: "Juan dela Cruz", role: "Human Resources", avatar: "🧑‍💼" },
+  // { name: "Blandin Son", role: "Cashier", avatar: "👨‍💻" },
+  // { name: "Chrysler Mc", role: "Cashier", avatar: "👩‍💻" },
+  // { name: "John Harley", role: "Accountant", avatar: "🧑‍💼" },
+  // { name: "Imo mama", role: "Accountant", avatar: "👨‍💼" },
 ];
 
 const AdminContainer = () => {

@@ -1,7 +1,61 @@
-import React from 'react'
+import { useEffect, useState } from 'react'
+import { fetchUserById } from '../../api/fetchUserApi'
+
+interface UserData {
+  systemUid: string
+  firstName: string
+  middleName?: string
+  lastName: string
+  role: string
+}
 
 export default function AccountSettings() {
+  const uid = localStorage.getItem('uid') || ''
+  const [userData, setUserData] = useState<UserData | null>(null)
+
+  useEffect(() => {
+    if (!uid) return
+
+    const getUser = async () => {
+      try {
+        const data = await fetchUserById(uid)
+        setUserData(data)
+      } catch (err) {
+        console.error('Error fetching user:', err)
+      }
+    }
+
+    getUser()
+  }, [uid])
+
   return (
-    <div>AccountSettings</div>
+    <div className="h-full bg-gray-100 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-lg p-6 mb-auto w-full max-w-md">
+        <div className="flex items-center space-x-4">
+          <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center text-xl font-bold text-gray-600">
+            👤
+          </div>
+          <div>
+            {userData && (
+              <>
+                <p className="text-lg font-semibold text-gray-800">
+                  {userData.systemUid}
+                </p>
+                <p className="text-base text-gray-600">
+                  {`${userData.firstName} ${userData.middleName || ''} ${userData.lastName}`}
+                </p>
+                <p className="text-sm text-gray-500 capitalize">{userData.role}</p>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <p className="text-blue-500 text-sm cursor-pointer w-full text-center hover:underline">
+            Edit Profile
+          </p>
+        </div>
+      </div>
+    </div>
   )
 }

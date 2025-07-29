@@ -1,22 +1,44 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X, CheckCircle, HelpCircle } from 'lucide-react';
+import { fetchUserById } from '../../api/fetchUserApi'; // Make sure this import works
 
 interface ApprovalConfirmationProps {
+  adminId: string; // 🔄 Use this to fetch OTP
   adminName: string;
-  otpCode?: string;
   onConfirm: () => void;
   onClose: () => void;
   skipConfirmation?: boolean;
 }
 
 const ApprovalConfirmation = ({
+  adminId,
   adminName,
-  otpCode,
   onConfirm,
   onClose,
   skipConfirmation,
 }: ApprovalConfirmationProps) => {
   const [confirmed, setConfirmed] = useState(skipConfirmation ?? false);
+  const [otpCode, setOtpCode] = useState<string>('-----');
+
+  useEffect(() => {
+    const fetchOtp = async () => {
+      try {
+        const user = await fetchUserById(adminId);
+        const code = user?.OTP?.code || '-----';
+        console.log('Fetched OTP Code:', code);
+        console.log('Fetched:', user);
+        setOtpCode(code);
+      } catch (err) {
+        console.error('Failed to fetch OTP code:', err);
+        setOtpCode('-----');
+      }
+    };
+
+    // Only fetch OTP after confirmation OR if skipConfirmation is true
+    if (confirmed || skipConfirmation) {
+      fetchOtp();
+    }
+  }, [adminId, confirmed, skipConfirmation]);
 
   const handleConfirm = () => {
     setConfirmed(true);
@@ -32,7 +54,6 @@ const ApprovalConfirmation = ({
 
         {!confirmed ? (
           <>
-            {/* Confirmation Icon */}
             <div className="flex justify-center mb-4">
               <div className="bg-yellow-100 text-yellow-600 rounded-full p-4">
                 <HelpCircle className="w-10 h-10" />
@@ -59,7 +80,6 @@ const ApprovalConfirmation = ({
           </>
         ) : (
           <>
-            {/* Success Icon */}
             <div className="flex justify-center mb-4">
               <div className="bg-green-100 text-green-600 rounded-full p-4">
                 <CheckCircle className="w-10 h-10" />
@@ -73,7 +93,7 @@ const ApprovalConfirmation = ({
               This code is sent to the new account owner's email:
             </p>
             <div className="bg-gray-100 border rounded-lg text-2xl font-mono font-semibold py-3 px-6 inline-block mb-2">
-              {otpCode || '-----'}
+              {otpCode}
             </div>
             <p className="text-sm text-gray-500">This code will expire in 24 hours.</p>
           </>

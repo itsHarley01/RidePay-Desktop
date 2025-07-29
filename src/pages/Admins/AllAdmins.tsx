@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 import AddNewAdmin from '../../components/Admins/AddNewAdmin';
 import AdminDetails from '../../components/Admins/AdminDetails';
+import { getAllAdminUsers } from '../../api/getAllAdmins';
+import { maskEmail, maskPhone } from '../../utils/stringMasking';
 
 interface Admin {
   id: string;
+  sysid: string;
   name: string;
   birthdate: string;
   gender: string;
@@ -11,7 +14,13 @@ interface Admin {
   phone: string;
   organization: string;
   role: string;
-  status: 'pending' | 'approved' | 'running' | 'deactivated';
+  status: {
+      status: 'pending' | 'approved' | 'activated' | 'deactivated';
+      dateOfAccountCreation?: string;
+      dateOfAccountApproval?: string;
+      dateOfAccountActivation?: string;
+      dateOfAccountDeactivation?: string;
+    };
 }
 
 const AllAdmins = () => {
@@ -21,51 +30,60 @@ const AllAdmins = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  // ✅ Load temporary admins on first mount
-  useEffect(() => {
-    const sampleAdmins: Admin[] = [
-      {
-        id: 'A001',
-        name: 'Juan Dela Cruz',
-        birthdate: '1990-01-01',
-        gender: 'Male',
-        email: 'juan@example.com',
-        phone: '09171234567',
-        organization: 'IT Department',
-        role: 'System Administrator',
-        status: 'pending',
-      },
-      {
-        id: 'A002',
-        name: 'Maria Clara',
-        birthdate: '1992-05-15',
-        gender: 'Female',
-        email: 'maria@example.com',
-        phone: '09181234567',
-        organization: 'HR Department',
-        role: 'HR Admin',
-        status: 'approved',
-      },
-      {
-        id: 'A003',
-        name: 'Jose Rizal',
-        birthdate: '1989-12-30',
-        gender: 'Male',
-        email: 'jose@example.com',
-        phone: '09192223333',
-        organization: 'Research Dept.',
-        role: 'Lead Researcher',
-        status: 'running',
-      },
-    ];
+  const allowedRoles = [
+  'admin',
+  'super-admin',
+  'admin-transport-cooperative',
+  'admin-operator',
+  'admin-hr',
+  'admin-driver',
+  'admin-accountant',
+];
 
-    setAdmins(sampleAdmins);
+
+  // ✅ Move this outside useEffect so you can reuse it
+const loadAdmins = async () => {
+  try {
+    const users = await getAllAdminUsers();
+    console.log('Fetched users from API:', users); // DEBUG
+
+    const normalized = users.map((user: any) => ({
+      id: user.uid,
+      sysid: user.systemUid,
+      name: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`,
+      birthdate: user.birthdate,
+      gender: user.gender,
+      email: user.email,
+      phone: user.contactNumber,
+      organization: user.organization,
+      role: user.role,
+      status: {
+        status: user.status?.status ?? 'pending',
+        dateOfAccountCreation: user.status?.dateOfAccountCreation,
+        dateOfAccountApproval: user.status?.dateOfAccountApproval,
+        dateOfAccountActivation: user.status?.dateOfAccountActivation,
+        dateOfAccountDeactivation: user.status?.dateOfAccountDeactivation,
+      },
+    }));
+
+    const filtered = normalized.filter(user =>
+      allowedRoles.includes(user.role?.toLowerCase())
+    );
+
+
+    setAdmins(filtered);
+  } catch (error) {
+    console.error('Failed to load admins:', error);
+  }
+};
+
+
+
+  // ✅ Now use it here properly
+  useEffect(() => {
+    loadAdmins();
   }, []);
 
-  const handleAddAdmin = (admin: Admin) => {
-    setAdmins((prev) => [...prev, admin]);
-    setShowAddAdmin(false);
-  };
 
   const totalPages = Math.ceil(admins.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -76,24 +94,35 @@ const AllAdmins = () => {
       <AddNewAdmin
         isOpen={showAddAdmin}
         onClose={() => setShowAddAdmin(false)}
-        onSubmit={handleAddAdmin}
+        onSubmit={() => {
+          setShowAddAdmin(false);
+          loadAdmins();
+        }}
       />
 
       {selectedAdmin && (
         <AdminDetails
-          admin={selectedAdmin}
+          admin={{
+            ...selectedAdmin,
+            status: selectedAdmin.status.status,
+            dateOfAccountCreation: selectedAdmin.status.dateOfAccountCreation,
+            dateOfAccountApproval: selectedAdmin.status.dateOfAccountApproval,
+            dateOfAccountActivation: selectedAdmin.status.dateOfAccountActivation,
+            dateOfAccountDeactivation: selectedAdmin.status.dateOfAccountDeactivation,
+          }}
           onClose={() => setSelectedAdmin(null)}
-          onApprove={(id) => {
-    // your approve logic here
-    console.log("Approving admin with ID:", id);
-  }}
+          onApprove={() => {
+            setSelectedAdmin(null);
+            loadAdmins();
+          }}
+          onApproveSuccess={loadAdmins}
         />
       )}
 
       {/* Search + Add Admin Button */}
       <div className="flex justify-between items-center mb-4">
         <input
-          type="text"
+        type="text"
           placeholder="Search admin..."
           className="border border-gray-300 px-4 py-2 rounded-md w-1/2"
         />
@@ -126,16 +155,16 @@ const AllAdmins = () => {
               <tbody>
                 {currentAdmins.map((admin, i) => (
                   <tr key={admin.id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-100'}>
-                    <td className="p-3">{admin.id}</td>
+                    <td className="p-3">{admin.sysid}</td>
                     <td className="p-3">{admin.name}</td>
                     <td className="p-3">{admin.organization}</td>
                     <td className="p-3">{admin.role}</td>
-                    <td className="p-3">{admin.phone}</td>
-                    <td className="p-3">{admin.email}</td>
+                    <td className="p-3">{maskPhone(admin.phone)}</td>
+                    <td className="p-3">{maskEmail(admin.email)}</td>
                     <td className="p-3">
                         <div className="relative inline-block">
                           {/* Red dot if pending */}
-                          {admin.status === 'pending' && (
+                          {admin.status.status === 'pending' && (
                             <span className="absolute -top-1 -left-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white z-10" />
                           )}
                           <button
