@@ -21,6 +21,26 @@ const BusTransactions = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  // Filter based on searchTerm
+const filteredTransactions = transactions.filter((tx) =>
+  tx.transactionUID.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  tx.busId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  tx.driverId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  tx.deviceId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  tx.fromUser.toLowerCase().includes(searchTerm.toLowerCase())
+);
+
+// Pagination logic
+const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+const paginatedTransactions = filteredTransactions.slice(
+  (currentPage - 1) * itemsPerPage,
+  currentPage * itemsPerPage
+);
+
 
 useEffect(() => {
   const fetchBusTransactions = async () => {
@@ -50,9 +70,24 @@ useEffect(() => {
 
       {/* Sub Heading */}
       <div className="mt-6 border-b border-gray-300"></div>
+      
 
       <div className="bg-white shadow-md p-6 rounded-lg relative mt-6">
         <h2 className="text-xl font-semibold mb-4">Bus Transactions</h2>
+
+        <div className="mb-4 flex justify-between items-center">
+          <input
+            type="text"
+            placeholder="Search by Transaction ID, Bus, Driver..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1); // Reset to first page on new search
+            }}
+            className="px-4 py-2 border border-gray-300 rounded-md w-full max-w-md"
+          />
+        </div>
+          
 
         {/* States */}
         {loading ? (
@@ -75,7 +110,7 @@ useEffect(() => {
                 </tr>
               </thead>
               <tbody>
-                {transactions.map((tx, i) => (
+                {paginatedTransactions.map((tx, i) => (
                   <tr
                     key={tx.transactionUID}
                     className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
@@ -99,6 +134,23 @@ useEffect(() => {
                 ))}
               </tbody>
             </table>
+
+            <div className="flex justify-center mt-6 gap-2">
+  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+    <button
+      key={page}
+      onClick={() => setCurrentPage(page)}
+      className={`px-3 py-1 rounded-md ${
+        page === currentPage
+          ? 'bg-[#0A2A54] text-white'
+          : 'bg-gray-200 text-gray-700'
+      }`}
+    >
+      {page}
+    </button>
+  ))}
+</div>
+
           </div>
         )}
       </div>

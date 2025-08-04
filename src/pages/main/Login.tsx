@@ -16,26 +16,40 @@ export default function Login() {
   const handleLogin = async () => {
     setError(null);
     setLoading(true);
-
+    
     try {
-      // Step 1: Log in and get token + uid
+      // Step 1: Log in and get token (+ possibly uid or dev data)
       const res = await loginAuthApi({ email, password });
+    
       localStorage.setItem('token', res.token);
-      localStorage.setItem('uid', res.uid);
-
-      // Step 2: Fetch user info
-      const user = await fetchUserById(res.uid);
-
-      // Step 3: Save user role to localStorage
-      if (user.role || user.firstName || user.lastName) {
-        localStorage.setItem('role', user.role);
-        localStorage.setItem('sysid', user.systemUid);
-        localStorage.setItem('firstName', user.firstName);
-        localStorage.setItem('lastName', user.lastName);
+    
+      if (res.isDev) {
+        // 👉 Handle Dev Superadmin Login
+        localStorage.setItem('firstName', res.firstName);
+        localStorage.setItem('lastName', res.lastName);
+        localStorage.setItem('role', res.role);
+        localStorage.setItem('isDev', 'true');
+      
+        // Optional: Clear Firebase-related values if switching from user to dev
+        localStorage.removeItem('uid');
+        localStorage.removeItem('sysid');
+      } else {
+        // 👉 Handle Normal Firebase Login
+        localStorage.setItem('uid', res.uid);
+        localStorage.setItem('isDev', 'false');
+      
+        // Fetch additional user info
+        const user = await fetchUserById(res.uid);
+      
+        if (user.role || user.firstName || user.lastName) {
+          localStorage.setItem('role', user.role);
+          localStorage.setItem('sysid', user.systemUid);
+          localStorage.setItem('firstName', user.firstName);
+          localStorage.setItem('lastName', user.lastName);
+        }
       }
-
-
-      // Step 4: Navigate to dashboard
+    
+      // Step 3: Navigate to dashboard
       navigate('/dashboard');
     } catch (err: any) {
       console.error(err);
@@ -44,6 +58,7 @@ export default function Login() {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="flex justify-center items-center h-screen bg-white">

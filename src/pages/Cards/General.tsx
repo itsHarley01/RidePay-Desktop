@@ -3,6 +3,7 @@ import { Pencil, CreditCard, X } from 'lucide-react'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { getCardPrice, updateCardPrice } from '../../api/cardApi'
+import CardTransactionTable from '../../components/Card/CardTransactionTable'
 
 export default function General() {
   const [price, setPrice] = useState('')
@@ -55,7 +56,7 @@ export default function General() {
       {loading ? (
         <p className="mt-6 text-gray-500">Loading card price...</p>
       ) : (
-        <div className="mt-6 max-w-xl bg-gray-100 p-4 rounded-lg shadow-lg shadow-gray-400 relative">
+        <div className="mt-6 max-w-xl bg-gray-100 p-4 rounded-lg shadow-md shadow-gray-400 relative">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2 text-xl font-semibold text-[#0A2A54]">
               <CreditCard size={20} /> Card Price
@@ -106,6 +107,10 @@ export default function General() {
           </div>
         </div>
       )}
+      
+      <div className='mt-10'>
+        <CardTransactionTable/>
+      </div>
 
       <ToastContainer position="top-right" autoClose={3000} />
     </div>

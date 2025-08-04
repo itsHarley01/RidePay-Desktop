@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import BusTable from '../../components/Drivers/BusTable';
-import SalesTable from '../../components/Drivers/salesTable';
 
 export default function DriverHistoy() {
     const [activeTab, setActiveTab] = useState<'bus' | 'sales'>('bus');
@@ -23,21 +22,13 @@ export default function DriverHistoy() {
             }`}
             onClick={() => setActiveTab('bus')}
           >
-            Bus
-          </button>
-          <button
-            className={`pb-2 text-lg font-medium transition-all duration-200 ${
-              activeTab === 'sales' ? 'text-[#0A2A54] border-b-4 border-yellow-400' : 'text-gray-500'
-            }`}
-            onClick={() => setActiveTab('sales')}
-          >
-            Sales
+            Bus History
           </button>
         </div>
       </div>
 
     <div className="mt-6">
-      {activeTab === 'bus' ? <BusTable /> : <SalesTable />}
+      <BusTable />
     </div>
 
     </div>

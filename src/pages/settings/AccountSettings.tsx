@@ -1,32 +1,44 @@
-import { useEffect, useState } from 'react'
-import { fetchUserById } from '../../api/fetchUserApi'
+import { useEffect, useState } from 'react';
+import { fetchUserById } from '../../api/fetchUserApi';
 
 interface UserData {
-  systemUid: string
-  firstName: string
-  middleName?: string
-  lastName: string
-  role: string
+  systemUid?: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+  role: string;
 }
 
 export default function AccountSettings() {
-  const uid = localStorage.getItem('uid') || ''
-  const [userData, setUserData] = useState<UserData | null>(null)
+  const uid = localStorage.getItem('uid') || '';
+  const isDev = localStorage.getItem('isDev') === 'true';
+
+  const [userData, setUserData] = useState<UserData | null>(null);
 
   useEffect(() => {
-    if (!uid) return
+    if (isDev) {
+      // Load from localStorage for dev superadmin
+      const devUser: UserData = {
+        firstName: localStorage.getItem('firstName') || 'Dev',
+        lastName: localStorage.getItem('lastName') || 'User',
+        role: localStorage.getItem('role') || 'super-admin',
+        systemUid: 'DEV-ACCOUNT',
+      };
+      setUserData(devUser);
+    } else if (uid) {
+      // Load from backend for regular users
+      const getUser = async () => {
+        try {
+          const data = await fetchUserById(uid);
+          setUserData(data);
+        } catch (err) {
+          console.error('Error fetching user:', err);
+        }
+      };
 
-    const getUser = async () => {
-      try {
-        const data = await fetchUserById(uid)
-        setUserData(data)
-      } catch (err) {
-        console.error('Error fetching user:', err)
-      }
+      getUser();
     }
-
-    getUser()
-  }, [uid])
+  }, [uid, isDev]);
 
   return (
     <div className="h-full bg-gray-100 flex items-center justify-center p-4">
@@ -39,23 +51,27 @@ export default function AccountSettings() {
             {userData && (
               <>
                 <p className="text-lg font-semibold text-gray-800">
-                  {userData.systemUid}
+                  {userData.systemUid || '—'}
                 </p>
                 <p className="text-base text-gray-600">
                   {`${userData.firstName} ${userData.middleName || ''} ${userData.lastName}`}
                 </p>
-                <p className="text-sm text-gray-500 capitalize">{userData.role}</p>
+                <p className="text-sm text-gray-500 capitalize">
+                  {userData.role}
+                </p>
               </>
             )}
           </div>
         </div>
 
-        <div className="mt-6">
-          <p className="text-blue-500 text-sm cursor-pointer w-full text-center hover:underline">
-            Edit Profile
-          </p>
-        </div>
+        {!isDev && (
+          <div className="mt-6">
+            <p className="text-blue-500 text-sm cursor-pointer w-full text-center hover:underline">
+              Edit Profile
+            </p>
+          </div>
+        )}
       </div>
     </div>
-  )
+  );
 }

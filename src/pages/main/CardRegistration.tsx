@@ -15,7 +15,7 @@ export default function CardRegistration() {
       </div>
 
       {/* Tabs */}
-            <div className="mt-6 border-b border-gray-300">
+      <div className="mt-6 border-b border-gray-300">
         <div className="flex space-x-8">
           <button
             className={`pb-2 text-lg font-medium transition-all duration-200 ${

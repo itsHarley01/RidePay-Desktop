@@ -12,4 +12,6 @@ export const logout = () => {
   localStorage.removeItem('role');
   localStorage.removeItem('firstName');
   localStorage.removeItem('lastName');
+  localStorage.removeItem('isDev'); 
 };
+

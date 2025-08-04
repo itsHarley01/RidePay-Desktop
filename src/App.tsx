@@ -20,6 +20,7 @@ import ProtectedRouteByRole from './routes/ProtectedRouteByRole'
 import PublicRoute from './routes/PublicRoute'
 import DriverDashboard from './pages/Drivers/DriverDashboard'
 import DriverHistoy from './pages/Drivers/DriverHistoy'
+import TopUp from './pages/main/TopUp'
 
 export default function App() {
   return (
@@ -102,7 +103,7 @@ export default function App() {
             path="topup"
             element={
               <ProtectedRouteByRole allowedRoles={['super-admin', 'admin-transport-cooperative']}>
-                <TopUpRecords />
+                <TopUp />
               </ProtectedRouteByRole>
             }
           />
