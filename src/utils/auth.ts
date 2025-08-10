@@ -13,5 +13,7 @@ export const logout = () => {
   localStorage.removeItem('firstName');
   localStorage.removeItem('lastName');
   localStorage.removeItem('isDev'); 
+  localStorage.removeItem('organization'); 
+  localStorage.removeItem('operatorUnit'); 
 };
 

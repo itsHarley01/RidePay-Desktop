@@ -46,6 +46,8 @@ export default function Login() {
           localStorage.setItem('sysid', user.systemUid);
           localStorage.setItem('firstName', user.firstName);
           localStorage.setItem('lastName', user.lastName);
+          localStorage.setItem('organization', user.organization);
+          localStorage.setItem('operatorUnit', user.operatorUnit);
         }
       }
     

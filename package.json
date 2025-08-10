@@ -10,12 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.7",
     "@heroicons/react": "^2.2.0",
     "@react-google-maps/api": "^2.20.7",
     "@tailwindcss/vite": "^4.1.11",
     "axios": "^1.11.0",
     "concurrently": "^9.2.0",
     "cross-env": "^7.0.3",
+    "d3-org-chart": "^3.1.1",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.525.0",
     "react": "^18.2.0",

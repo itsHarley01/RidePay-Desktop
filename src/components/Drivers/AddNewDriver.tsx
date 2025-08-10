@@ -10,7 +10,7 @@ interface Driver {
   email: string;
   phone: string;
   organization: string;
-  // bus: string; // commented out
+  operatorUnit: string;
   role: 'driver';
   status: 'pending' | 'approved' | 'activated' | 'deactivated';
 }
@@ -22,6 +22,12 @@ interface Props {
 }
 
 const AddNewDriver: React.FC<Props> = ({ isOpen, onClose, onSubmit }) => {
+  // Auth info from localStorage
+  const loggedInRole = localStorage.getItem('role')|| '';
+  const loggedInOrg = localStorage.getItem('organization') || '';
+  const loggedInOperatorUnit = localStorage.getItem('operatorUnit') || '';
+
+  // State
   const [firstName, setFirstName] = useState('');
   const [middleName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -29,22 +35,10 @@ const AddNewDriver: React.FC<Props> = ({ isOpen, onClose, onSubmit }) => {
   const [gender, setGender] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [organization, setOrganization] = useState('Not yet assigned');
-  // const [bus, setBus] = useState('Not yet assigned'); // commented out
+  const [organization, setOrganization] = useState(loggedInOrg || '');
+  const [operatorUnit, setOperatorUnit] = useState(loggedInOperatorUnit || '');
 
-  const organizationOptions = [
-    { label: 'Assign Later', value: 'Not yet assigned' },
-    { label: 'Organization 1', value: 'Organization 1' },
-    { label: 'Organization 2', value: 'Organization 2' },
-    { label: 'Organization 3', value: 'Organization 3' },
-  ];
-
-  // const busOptions = [
-  //   { label: 'Assign Later', value: 'Not yet assigned' },
-  //   { label: 'Bus 1', value: 'Bus 1' },
-  //   { label: 'Bus 2', value: 'Bus 2' },
-  //   { label: 'Bus 3', value: 'Bus 3' },
-  // ];
+  const isAdminOperator = loggedInRole === 'admin-operator';
 
   useEffect(() => {
     if (isOpen) {
@@ -55,10 +49,12 @@ const AddNewDriver: React.FC<Props> = ({ isOpen, onClose, onSubmit }) => {
       setGender('');
       setEmail('');
       setPhone('');
-      setOrganization('Not yet assigned');
-      // setBus('Not yet assigned'); // commented out
+      if (!isAdminOperator) {
+        setOrganization('');
+        setOperatorUnit('');
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, isAdminOperator]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,8 +67,8 @@ const AddNewDriver: React.FC<Props> = ({ isOpen, onClose, onSubmit }) => {
       gender,
       email,
       contactNumber: phone,
-      organization,
-      // bus, // commented out
+      organization: isAdminOperator ? loggedInOrg : organization,
+      operatorUnit: isAdminOperator ? loggedInOperatorUnit : operatorUnit,
       role: 'driver',
     };
 
@@ -89,8 +85,8 @@ const AddNewDriver: React.FC<Props> = ({ isOpen, onClose, onSubmit }) => {
         gender,
         email,
         phone,
-        organization,
-        // bus, // commented out
+        organization: driverData.organization,
+        operatorUnit: driverData.operatorUnit,
         role: 'driver',
         status: 'pending',
       });
@@ -103,6 +99,7 @@ const AddNewDriver: React.FC<Props> = ({ isOpen, onClose, onSubmit }) => {
   };
 
   if (!isOpen) return null;
+
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -231,47 +228,34 @@ const AddNewDriver: React.FC<Props> = ({ isOpen, onClose, onSubmit }) => {
             </div>
           </section>
 
-          {/* Organization Assignment (Bus assignment removed) */}
-          <section className="bg-gray-100 p-4 rounded-lg mb-6">
-            <h3 className="text-xl font-semibold text-[#0A2A54] mb-4">Assignment</h3>
-
-            <div className="flex gap-4">
-              <div className="w-1/2">
-                <label className="block font-medium">Assign Organization</label>
-                <select
-                  className="w-full border px-4 py-2 rounded"
-                  value={organization}
-                  onChange={e => setOrganization(e.target.value)}
-                  required
-                >
-                  {organizationOptions.map((org, index) => (
-                    <option key={index} value={org.value}>
-                      {org.label}
-                    </option>
-                  ))}
-                </select>
+         {/* Assignment */}
+          {!isAdminOperator && (
+            <section className="bg-gray-100 p-4 rounded-lg mb-6">
+              <h3 className="text-xl font-semibold text-[#0A2A54] mb-4">Assignment</h3>
+              <div className="flex gap-4">
+                <div className="w-1/2">
+                  <label className="block font-medium">Organization</label>
+                  <input
+                    type="text"
+                    className="w-full border px-4 py-2 rounded"
+                    value={organization}
+                    onChange={e => setOrganization(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="w-1/2">
+                  <label className="block font-medium">Operator Unit</label>
+                  <input
+                    type="text"
+                    className="w-full border px-4 py-2 rounded"
+                    value={operatorUnit}
+                    onChange={e => setOperatorUnit(e.target.value)}
+                    required
+                  />
+                </div>
               </div>
-
-              {/* Bus assignment removed/commented out */}
-              {/* 
-              <div className="w-1/2">
-                <label className="block font-medium">Assign Bus</label>
-                <select
-                  className="w-full border px-4 py-2 rounded"
-                  value={bus}
-                  onChange={e => setBus(e.target.value)}
-                  required
-                >
-                  {busOptions.map((b, index) => (
-                    <option key={index} value={b.value}>
-                      {b.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              */}
-            </div>
-          </section>
+            </section>
+          )}
 
           <div className="pt-4">
             <button

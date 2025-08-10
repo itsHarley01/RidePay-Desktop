@@ -1,20 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Cog6ToothIcon,
   BellIcon,
   UserCircleIcon,
+  WrenchScrewdriverIcon,
   XMarkIcon,
   ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 import GeneralSettings from "./GeneralSettings";
 import NotificationSettings from "./NotificationSettings";
 import AccountSettings from "./AccountSettings";
-import { logout } from "../../utils/auth"; 
+import DevMaintenanceSettings from "./DevMaintenanceSettings"; // ✅ import
+import { logout } from "../../utils/auth";
 
 export default function AppSettings({ onClose }: { onClose: () => void }) {
-  const navigate = useNavigate(); // ✅ create navigate instance
-  const [activeTab, setActiveTab] = useState<"general" | "notifications" | "account">("general");
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<
+    "general" | "notifications" | "account" | "dev"
+  >("general");
+
+  const [isDev, setIsDev] = useState(false);
+
+  useEffect(() => {
+    const devFlag = localStorage.getItem("isDev") === "true";
+    setIsDev(devFlag);
+  }, []);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -24,13 +35,15 @@ export default function AppSettings({ onClose }: { onClose: () => void }) {
         return <NotificationSettings />;
       case "account":
         return <AccountSettings />;
+      case "dev":
+        return isDev ? <DevMaintenanceSettings /> : null;
       default:
         return null;
     }
   };
 
   const handleLogout = () => {
-    logout(); 
+    logout();
     navigate("/");
   };
 
@@ -65,6 +78,7 @@ export default function AppSettings({ onClose }: { onClose: () => void }) {
                 <Cog6ToothIcon className="w-5 h-5" />
                 <span>General</span>
               </div>
+
               <div
                 onClick={() => setActiveTab("notifications")}
                 className={`flex items-center space-x-2 cursor-pointer hover:text-[#f2be22] ${
@@ -74,6 +88,7 @@ export default function AppSettings({ onClose }: { onClose: () => void }) {
                 <BellIcon className="w-5 h-5" />
                 <span>Notifications</span>
               </div>
+
               <div
                 onClick={() => setActiveTab("account")}
                 className={`flex items-center space-x-2 cursor-pointer hover:text-[#f2be22] ${
@@ -83,6 +98,19 @@ export default function AppSettings({ onClose }: { onClose: () => void }) {
                 <UserCircleIcon className="w-5 h-5" />
                 <span>Account</span>
               </div>
+
+              {/* ✅ Dev-only tab */}
+              {isDev && (
+                <div
+                  onClick={() => setActiveTab("dev")}
+                  className={`flex items-center space-x-2 cursor-pointer hover:text-[#f2be22] ${
+                    activeTab === "dev" ? "text-[#f2be22]" : ""
+                  }`}
+                >
+                  <WrenchScrewdriverIcon className="w-5 h-5" />
+                  <span>Dev Tools</span>
+                </div>
+              )}
             </div>
           </div>
 

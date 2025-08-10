@@ -10,6 +10,7 @@ export const registerDriver = async (driver: {
   contactNumber: string;
   role: string;
   organization: string;
+  operatorUnit: string;
 //   bus: string;
 }) => {
   try {

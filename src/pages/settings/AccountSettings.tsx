@@ -59,6 +59,8 @@ export default function AccountSettings() {
                 <p className="text-sm text-gray-500 capitalize">
                   {userData.role}
                 </p>
+                <p>{localStorage.getItem('organization')}</p>
+                <p>{localStorage.getItem('operatorUnit')}</p>
               </>
             )}
           </div>

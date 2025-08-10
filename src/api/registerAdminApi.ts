@@ -10,6 +10,7 @@ export const registerAdmin = async (admin: {
   contactNumber: string;
   role: string;
   organization: string;
+  operatorUnit: string;
 }) => {
   try {
     const response = await api.post('/register', admin);
