@@ -1,7 +1,6 @@
 import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { addNewBus } from '../../api/busApi';
-import { getAllDrivers } from '../../api/driverApi';
 import { getAllDevices } from '../../api/deviceApi';
 
 
@@ -11,24 +10,35 @@ interface AddNewBusProps {
   onSubmit: () => void;
 }
 
-const AddNewBus = ({ isOpen, onClose, onSubmit }: AddNewBusProps) => {
+export const AddNewBus = ({ isOpen, onClose, onSubmit }: AddNewBusProps) => {
   const [formData, setFormData] = useState({
     busName: '',
     model: '',
     numberOfSeats: '',
     licensePlate: '',
     assignedDevice: '',
-    organization: '',
-    driver: '',
+    // remove organization and driver from formData
   });
+
   const [devices, setDevices] = useState<{ deviceUID: string; deviceName: string }[]>([]);
 
 
-  const [drivers, setDrivers] = useState<
-    { uid: string; firstName: string; lastName: string }[]
-  >([]);
+  useEffect(() => {
+  if (isOpen) {
+    fetchAllDevices();
+  }
+}, [isOpen]);
 
-  const organizations = ['assign later','org1', 'org2', 'org3'];
+
+  const fetchAllDevices = async () => {
+    try {
+      const deviceData = await getAllDevices();
+      const devicesArray = Object.values(deviceData || {}) as any[];
+      setDevices(devicesArray);
+    } catch (err) {
+      console.error('Error loading devices', err);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -38,13 +48,7 @@ const AddNewBus = ({ isOpen, onClose, onSubmit }: AddNewBusProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (
-      !formData.busName ||
-      !formData.model ||
-      !formData.numberOfSeats ||
-      !formData.licensePlate ||
-      !formData.organization
-    ) {
+    if (!formData.busName || !formData.model || !formData.numberOfSeats || !formData.licensePlate) {
       alert('Please fill in all required fields.');
       return;
     }
@@ -52,6 +56,9 @@ const AddNewBus = ({ isOpen, onClose, onSubmit }: AddNewBusProps) => {
     const finalData = {
       ...formData,
       numberOfSeats: parseInt(formData.numberOfSeats, 10),
+      organization: localStorage.getItem('organization') || '', // fetch from localStorage
+      operatorUnit: localStorage.getItem('operatorUnit') || '', // fetch from localStorage
+      driver: '', // send blank for now
     };
 
     try {
@@ -60,33 +67,6 @@ const AddNewBus = ({ isOpen, onClose, onSubmit }: AddNewBusProps) => {
     } catch (error) {
       alert('Failed to add bus.');
       console.error(error);
-    }
-  };
-
-  const fetchDrivers = async () => {
-    try {
-      const driverData = await getAllDrivers();
-      const driversArray = Object.values(driverData || {}) as any[];
-      setDrivers(driversArray); // should include uid, firstName, lastName
-    } catch (err) {
-      console.error('Error loading drivers', err);
-    }
-  };
-
-  useEffect(() => {
-    if (isOpen) {
-      fetchDrivers();
-      fetchDevices();
-    }
-  }, [isOpen]);
-
-  const fetchDevices = async () => {
-    try {
-      const deviceData = await getAllDevices();
-      const devicesArray = Object.values(deviceData || {}) as any[];
-      setDevices(devicesArray);
-    } catch (err) {
-      console.error('Error loading devices', err);
     }
   };
 
@@ -168,43 +148,6 @@ const AddNewBus = ({ isOpen, onClose, onSubmit }: AddNewBusProps) => {
               {devices.map((device) => (
                 <option key={device.deviceUID} value={device.deviceUID}>
                   {device.deviceName}
-                </option>
-              ))}
-            </select>
-          </div>          
-
-          {/* Organization Dropdown */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Organization *</label>
-            <select
-              name="organization"
-              value={formData.organization}
-              onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
-              required
-            >
-              <option value="">Select Organization</option>
-              {organizations.map((org) => (
-                <option key={org} value={org}>
-                  {org}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Driver Dropdown */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Assign Driver</label>
-            <select
-              name="driver"
-              value={formData.driver}
-              onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
-            >
-              <option value="">Assign Later</option>
-              {drivers.map((driver) => (
-                <option key={driver.uid} value={driver.uid}>
-                  {driver.firstName} {driver.lastName}
                 </option>
               ))}
             </select>

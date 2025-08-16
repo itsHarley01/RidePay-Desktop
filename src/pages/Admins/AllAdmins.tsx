@@ -13,6 +13,7 @@ interface Admin {
   email: string;
   phone: string;
   organization: string;
+  operatorUnit: string;
   role: string;
   status: {
       status: 'pending' | 'approved' | 'activated' | 'deactivated';
@@ -56,6 +57,7 @@ const loadAdmins = async () => {
       email: user.email,
       phone: user.contactNumber,
       organization: user.organization,
+      operatorUnit: user.operatorUnit,
       role: user.role,
       status: {
         status: user.status?.status ?? 'pending',
@@ -104,6 +106,7 @@ const loadAdmins = async () => {
         <AdminDetails
           admin={{
             ...selectedAdmin,
+            operatorUnit: selectedAdmin.operatorUnit,
             status: selectedAdmin.status.status,
             dateOfAccountCreation: selectedAdmin.status.dateOfAccountCreation,
             dateOfAccountApproval: selectedAdmin.status.dateOfAccountApproval,

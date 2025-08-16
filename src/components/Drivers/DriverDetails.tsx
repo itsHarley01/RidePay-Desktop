@@ -1,9 +1,10 @@
 import { X, User, Mail, Phone, Calendar, VenusAndMars, Building2, BadgeCheck, Eye, EyeOff } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import EditDriverDetails from './EditDriverDetails';
 import ApprovalConfirmation from '../Admins/ApprovalConfirmation'; // ✅ Same component reused
 import approveAccount from '../../api/accountApprovalApi'; // ✅ Make sure this path works
 import { maskEmail, maskPhone } from '../../utils/stringMasking';
+import { getRequirements } from '../../api/requirementsApi';
 
 interface DriverDetailsProps {
   driver: {
@@ -15,6 +16,7 @@ interface DriverDetailsProps {
     email: string;
     phone: string;
     organization: string;
+    operatorUnit: string;
     role: string;
     status: 'pending' | 'approved' | 'activated' | 'deactivated';
     otpCode?: string; // If applicable
@@ -42,6 +44,8 @@ const DriverDetails = ({ driver, onClose, onApproveSuccess }: DriverDetailsProps
   const [showOTPOnly, setShowOTPOnly] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
   const [showPhone, setShowPhone] = useState(false);
+  const [requirements, setRequirements] = useState([]);
+  const [filePreviews, setFilePreviews] = useState({});
 
   const handleApproveClick = () => {
     if (driver.status === 'approved') {
@@ -51,9 +55,44 @@ const DriverDetails = ({ driver, onClose, onApproveSuccess }: DriverDetailsProps
     }
   };
 
+    useEffect(() => {
+    let category = null;
+    if (driver.role === "driver") {
+      category = "driver";
+    }
+  
+    if (category) {
+      getRequirements(category).then(setRequirements);
+    }
+  }, [driver.role]);
+  
+  const handleFileChange = (reqId, file) => {
+    if (!file) return;
+  
+    if (file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setFilePreviews((prev) => ({
+          ...prev,
+          [reqId]: { type: "image", url: e.target.result, name: file.name }
+        }));
+      };
+      reader.readAsDataURL(file);
+    } else if (file.type === "application/pdf") {
+      setFilePreviews((prev) => ({
+        ...prev,
+        [reqId]: { type: "pdf", name: file.name }
+      }));
+    }
+  };
+  
+  
+
   return (
   <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-    <div className="bg-white w-full max-w-4xl rounded-lg shadow-xl p-8 relative flex flex-col">
+    <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-lg shadow-xl p-8 relative flex flex-col">
+
+      <div className="overflow-y-auto p-8">
       {/* Close Button */}
       <button onClick={onClose} className="absolute top-4 right-4">
         <X className="text-gray-500 hover:text-gray-700 w-6 h-6" />
@@ -159,7 +198,7 @@ const DriverDetails = ({ driver, onClose, onApproveSuccess }: DriverDetailsProps
           <div className="flex justify-between items-center">
             <span className="flex items-center gap-2">
               <Building2 className="text-gray-600 w-4 h-4" />
-              <span className="font-semibold">Organization:</span>
+              <span className="font-semibold">Transport Cooperative:</span>
             </span>
             <span>{driver.organization}</span>
           </div>
@@ -171,6 +210,15 @@ const DriverDetails = ({ driver, onClose, onApproveSuccess }: DriverDetailsProps
             </span>
             <span>{driver.role}</span>
           </div>
+
+          <div className="flex justify-between items-center">
+            <span className="flex items-center gap-2">
+              <Building2 className="text-gray-600 w-4 h-4" />
+              <span className="font-semibold">Operator Name:</span>
+            </span>
+            <span>{driver.operatorUnit}</span>
+          </div>
+            
         </div>
                   {/* Date of Info */}
           {(driver.dateOfAccountCreation ||
@@ -208,6 +256,39 @@ const DriverDetails = ({ driver, onClose, onApproveSuccess }: DriverDetailsProps
             </div>
           )}
 
+          
+        {requirements.map((req) => (
+          <div key={req.id} className="flex flex-col border border-gray-200 rounded-md p-4 mb-4">
+            <label className="font-semibold text-gray-700 mb-2">{req.name}</label>
+            <input
+              type="file"
+              accept={
+                req.inputType === "image"
+                  ? "image/*"
+                  : req.inputType === "image/pdf"
+                  ? "image/*,application/pdf"
+                  : "*/*"
+              }
+              onChange={(e) => handleFileChange(req.id, e.target.files[0])}
+              className="border border-gray-300 rounded-md p-2"
+            />
+
+            {/* Preview */}
+            {filePreviews[req.id] && filePreviews[req.id].type === "image" && (
+              <img
+                src={filePreviews[req.id].url}
+                alt="Preview"
+                className="mt-2 w-32 h-32 object-cover rounded-md border"
+              />
+            )}
+            {filePreviews[req.id] && filePreviews[req.id].type === "pdf" && (
+              <div className="mt-2 flex items-center gap-2 text-sm text-gray-600">
+                📄 {filePreviews[req.id].name}
+              </div>
+            )}
+          </div>
+        ))}
+
         {/* Buttons */}
         <div className="flex justify-end space-x-2">
           <button
@@ -225,6 +306,7 @@ const DriverDetails = ({ driver, onClose, onApproveSuccess }: DriverDetailsProps
             </button>
           )}
         </div>
+      </div>
       </div>
     </div>
 
@@ -258,6 +340,5 @@ const DriverDetails = ({ driver, onClose, onApproveSuccess }: DriverDetailsProps
   </div>
 );
 };
-
 
 export default DriverDetails;

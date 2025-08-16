@@ -16,13 +16,6 @@ export default function EditAdminDetails({
   const [formData, setFormData] = useState<any>({});
   const [loading, setLoading] = useState(true);
 
-  const organizationOptions = [
-    { label: 'Assign Later', value: 'Not yet assigned' },
-    { label: 'Organization 1', value: 'Organization 1' },
-    { label: 'Organization 2', value: 'Organization 2' },
-    { label: 'Organization 3', value: 'Organization 3' },
-  ];
-
   const roleOptions = [
     { label: 'Super Admin', value: 'super-admin' },
     { label: 'Admin Transport Cooperative', value: 'admin-transport-cooperative' },
@@ -229,24 +222,6 @@ export default function EditAdminDetails({
 
             <div className="flex gap-4">
               <div className="w-1/2">
-                <label className="block font-medium">Assign Organization</label>
-                <select
-                  className="w-full border px-4 py-2 rounded"
-                  value={formData.organization || ''}
-                  onChange={(e) =>
-                    setFormData({ ...formData, organization: e.target.value })
-                  }
-                >
-                  <option value="">Select Organization</option>
-                  {organizationOptions.map((org) => (
-                    <option key={org.value} value={org.value}>
-                      {org.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="w-1/2">
                 <label className="block font-medium">Role</label>
                 <select
                   className="w-full border px-4 py-2 rounded"
@@ -263,6 +238,31 @@ export default function EditAdminDetails({
                   ))}
                 </select>
               </div>
+                <div className="w-1/2">
+                  <label className="block font-medium">Transport Cooperative Name</label>
+                  <input
+                    type="text"
+                    className="w-full border px-4 py-2 rounded"
+                    value={formData.organization || ''}
+                    onChange={(e) =>
+                      setFormData({ ...formData, organization: e.target.value })
+                    }
+                    {...formData.role == 'super-admin' ? { disabled: true } : {disabled: false}}
+                  />
+                </div>
+                {formData.role == 'admin-operator' && (
+                  <div className="w-1/2">
+                    <label className="block font-medium">Operator Name</label>
+                    <input
+                      type="text"
+                      className="w-full border px-4 py-2 rounded"
+                      value={formData.operatorUnit || ''}
+                      onChange={(e) =>
+                        setFormData({ ...formData, operatorUnit: e.target.value })
+                      }
+                    />
+                  </div>
+                )}
             </div>
           </section>
 

@@ -14,17 +14,27 @@ import Locations from './pages/main/Locations'
 import AccountSignUp from './pages/main/AccountSignUp'
 import Shares from './pages/main/Shares'
 import ForgotPassword from './pages/main/ForgotPassword'
-
 import ProtectedRoute from './routes/ProtectedRoute'
 import ProtectedRouteByRole from './routes/ProtectedRouteByRole'
 import PublicRoute from './routes/PublicRoute'
-import DriverDashboard from './pages/Drivers/DriverDashboard'
 import DriverHistoy from './pages/Drivers/DriverHistoy'
 import TopUp from './pages/main/TopUp'
 
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+
 export default function App() {
   return (
-    <BrowserRouter>
+      <BrowserRouter>
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          pauseOnHover
+          draggable
+      />
       <Routes>
         {/* Public Routes */}
         <Route

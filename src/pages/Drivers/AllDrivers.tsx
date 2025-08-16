@@ -13,6 +13,7 @@ interface Driver {
   email: string;
   phone: string;
   organization: string;
+  operatorUnit: string;
   role: string;
   status: {
       status: 'pending' | 'approved' | 'activated' | 'deactivated';
@@ -44,6 +45,7 @@ const AllDrivers = () => {
         email: user.email,
         phone: user.contactNumber,
         organization: user.organization,
+        operatorUnit: user.operatorUnit,
         role: user.role,
         status: {
           status: user.status?.status ?? 'pending',

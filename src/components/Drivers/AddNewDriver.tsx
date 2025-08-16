@@ -234,7 +234,7 @@ const AddNewDriver: React.FC<Props> = ({ isOpen, onClose, onSubmit }) => {
               <h3 className="text-xl font-semibold text-[#0A2A54] mb-4">Assignment</h3>
               <div className="flex gap-4">
                 <div className="w-1/2">
-                  <label className="block font-medium">Organization</label>
+                  <label className="block font-medium">Transport Cooperative Name</label>
                   <input
                     type="text"
                     className="w-full border px-4 py-2 rounded"
@@ -244,7 +244,7 @@ const AddNewDriver: React.FC<Props> = ({ isOpen, onClose, onSubmit }) => {
                   />
                 </div>
                 <div className="w-1/2">
-                  <label className="block font-medium">Operator Unit</label>
+                  <label className="block font-medium">Operator Name</label>
                   <input
                     type="text"
                     className="w-full border px-4 py-2 rounded"

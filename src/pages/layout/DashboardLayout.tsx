@@ -16,6 +16,7 @@ import {
   ChevronDown,
   HandCoins,
   Map,
+  Paperclip
 } from 'lucide-react'
 import AppSettings from '../settings/AppSettings'
 

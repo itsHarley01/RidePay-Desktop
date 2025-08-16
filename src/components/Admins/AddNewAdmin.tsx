@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { FaTimes, FaEnvelope, FaPhone } from 'react-icons/fa';
 import { registerAdmin } from '../../api/registerAdminApi';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 
 interface Admin {
   id: string;
@@ -122,7 +125,7 @@ const AddNewAdmin: React.FC<Props> = ({ isOpen, onClose, onSubmit }) => {
       onClose();
     } catch (error: any) {
       console.error('❌ Failed to register admin:', error.response?.data || error.message);
-      alert(error.response?.data?.message || 'Something went wrong while adding admin.');
+      toast.error(error.response?.data?.message || 'Something went wrong while adding admin.');
     }
   };
 
@@ -130,6 +133,7 @@ const AddNewAdmin: React.FC<Props> = ({ isOpen, onClose, onSubmit }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
       <div className="bg-white w-full max-w-[80%] max-h-[90vh] shadow-lg overflow-y-auto relative p-6 space-y-4 rounded-lg">
         <button onClick={onClose} className="absolute top-4 left-4 text-gray-600 hover:text-red-500 text-xl">
           <FaTimes />
@@ -217,14 +221,14 @@ const AddNewAdmin: React.FC<Props> = ({ isOpen, onClose, onSubmit }) => {
               {/* Conditional Fields */}
               {loggedInRole === 'super-admin' && role !== 'super-admin' && role !== '' && (
                 <div className="w-1/2">
-                  <label className="block font-medium">Organization</label>
+                  <label className="block font-medium">Transport Cooperative Name</label>
                   <input type="text" className="w-full border px-4 py-2 rounded" value={organization} onChange={e => setOrganization(e.target.value)} />
                 </div>
               )}
 
               {role === 'admin-operator' && (
                 <div className="w-1/2">
-                  <label className="block font-medium">Operator Unit</label>
+                  <label className="block font-medium">Operator Name</label>
                   <input type="text" className="w-full border px-4 py-2 rounded" value={operatorUnit} onChange={e => setOperatorUnit(e.target.value)} required />
                 </div>
               )}

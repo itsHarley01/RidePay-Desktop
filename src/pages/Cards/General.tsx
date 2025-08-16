@@ -10,19 +10,21 @@ export default function General() {
   const [originalPrice, setOriginalPrice] = useState('')
   const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [canEdit, setCanEdit] = useState(true) // Default true, update in effect
+  const [saving, setSaving] = useState(false)
+  const [canEdit, setCanEdit] = useState(true)
 
   useEffect(() => {
     const role = localStorage.getItem('role')
-    // Restrict both transport cooperative and operator admins
     const restrictedRoles = ['admin-transport-cooperative', 'admin-operator']
     setCanEdit(!restrictedRoles.includes(role || ''))
 
     const fetchPrice = async () => {
       try {
         const data = await getCardPrice()
-        setPrice(data?.price?.toString() || '')
-        setOriginalPrice(data?.price?.toString() || '')
+        const numericPrice = parseFloat(data?.price) || 0
+        const formattedPrice = numericPrice.toFixed(2)
+        setPrice(formattedPrice)
+        setOriginalPrice(formattedPrice)
       } catch (err) {
         console.error('Failed to fetch card price', err)
         toast.error('Failed to fetch card price.')
@@ -35,19 +37,25 @@ export default function General() {
   }, [])
 
   const handleSave = async () => {
-    try {
-      const numericPrice = parseFloat(price)
-      if (isNaN(numericPrice) || numericPrice < 0) {
-        toast.error('Please enter a valid price.')
-        return
-      }
+    const numericPrice = parseFloat(price)
+    if (isNaN(numericPrice) || numericPrice < 0) {
+      toast.error('Please enter a valid price.')
+      return
+    }
 
-      await updateCardPrice(numericPrice)
-      setOriginalPrice(price)
+    setSaving(true)
+    try {
+      const response = await updateCardPrice(numericPrice)
+      const formattedPrice = response.price.toFixed(2)
+      setPrice(formattedPrice)
+      setOriginalPrice(formattedPrice)
       setIsEditing(false)
       toast.success('Card price updated successfully!')
     } catch (error) {
+      console.error(error)
       toast.error('Failed to update card price.')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -92,24 +100,28 @@ export default function General() {
                 onChange={(e) => setPrice(e.target.value)}
                 className="w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring focus:border-blue-300"
                 min="0"
-                disabled={!canEdit || !isEditing}
+                step="0.01"
+                disabled={!canEdit || !isEditing || saving}
               />
             </div>
 
             {isEditing && canEdit && (
               <button
                 onClick={handleSave}
-                className="bg-yellow-500 text-white px-6 py-2 rounded-lg shadow hover:bg-yellow-400 transition"
+                disabled={saving}
+                className={`bg-yellow-500 text-white px-6 py-2 rounded-lg shadow hover:bg-yellow-400 transition ${
+                  saving ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
-                Save Changes
+                {saving ? 'Saving...' : 'Save Changes'}
               </button>
             )}
           </div>
         </div>
       )}
-      
-      <div className='mt-10'>
-        <CardTransactionTable/>
+
+      <div className="mt-10">
+        <CardTransactionTable />
       </div>
 
       <ToastContainer position="top-right" autoClose={3000} />

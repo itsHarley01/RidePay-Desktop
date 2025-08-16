@@ -9,6 +9,7 @@ interface CardRecord {
   cardUID: string
   tagUID: string
   status: string
+  cardType: string
   issuedUser: string
   issuanceDate: string
 }
@@ -90,6 +91,7 @@ export default function CardIssuance() {
                   <th className="p-3">Card ID</th>
                   <th className="p-3">Tag ID</th>
                   <th className="p-3">Status</th>
+                  <th className="p-3">Card Type</th>
                   <th className="p-3">Issued User</th>
                   <th className="p-3">Date of Issuance</th>
                   <th className="p-3">Time of Issuance</th>
@@ -104,6 +106,7 @@ export default function CardIssuance() {
                       <td className="p-3">{card.cardUID}</td>
                       <td className="p-3">{card.tagUID}</td>
                       <td className="p-3">{card.status}</td>
+                      <td className="p-3">{card.cardType}</td>
                       <td className="p-3">{card.issuedUser || 'N/A'}</td>
                       <td className="p-3">
                         {d.toLocaleDateString('en-PH', {

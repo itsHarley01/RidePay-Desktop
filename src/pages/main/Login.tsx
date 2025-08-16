@@ -84,7 +84,7 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="example.email@gmail.com"
-              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-1 focus:ring-[#0A2A54]"
             />
           </div>
 
@@ -96,7 +96,7 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-1 focus:ring-[#0A2A54]"
               />
               <div
                 className="absolute inset-y-0 right-3 flex items-center text-gray-500 cursor-pointer"

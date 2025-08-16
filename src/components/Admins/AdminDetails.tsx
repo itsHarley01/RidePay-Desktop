@@ -1,9 +1,10 @@
 import { X, User, Mail, Phone, Calendar, VenusAndMars, Building2, BadgeCheck, Eye, EyeOff } from 'lucide-react';
 import ApprovalConfirmation from './ApprovalConfirmation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import approveAccount from '../../api/accountApprovalApi';
 import EditAdminDetails from './EditAdminDetails';
 import { maskEmail, maskPhone } from '../../utils/stringMasking';
+import { getRequirements } from '../../api/requirementsApi';
 
 interface AdminDetailsProps {
   admin: {
@@ -15,6 +16,7 @@ interface AdminDetailsProps {
     email: string;
     phone: string;
     organization: string;
+    operatorUnit: string;
     role: string;
     status: 'pending' | 'approved' | 'activated' | 'deactivated';
     otpCode?: string;
@@ -44,6 +46,9 @@ const AdminDetails = ({ admin, onClose, onApprove, onApproveSuccess }: AdminDeta
   const [showEditPanel, setShowEditPanel] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
   const [showPhone, setShowPhone] = useState(false);
+  const [requirements, setRequirements] = useState([]);
+  const [filePreviews, setFilePreviews] = useState({});
+
 
 
   const loggedInUID = localStorage.getItem('uid');
@@ -65,6 +70,40 @@ const AdminDetails = ({ admin, onClose, onApprove, onApproveSuccess }: AdminDeta
     }
     return true;
   };
+
+  useEffect(() => {
+  let category = null;
+  if (admin.role === "admin-transport-cooperative") {
+    category = "coop";
+  } else if (admin.role === "admin-operator") {
+    category = "operator";
+  }
+
+  if (category) {
+    getRequirements(category).then(setRequirements);
+  }
+}, [admin.role]);
+
+const handleFileChange = (reqId, file) => {
+  if (!file) return;
+
+  if (file.type.startsWith("image/")) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setFilePreviews((prev) => ({
+        ...prev,
+        [reqId]: { type: "image", url: e.target.result, name: file.name }
+      }));
+    };
+    reader.readAsDataURL(file);
+  } else if (file.type === "application/pdf") {
+    setFilePreviews((prev) => ({
+      ...prev,
+      [reqId]: { type: "pdf", name: file.name }
+    }));
+  }
+};
+
 
   const canApproveAdmin = () => {
     if (!onApprove) return false; // No handler passed
@@ -98,7 +137,9 @@ const AdminDetails = ({ admin, onClose, onApprove, onApproveSuccess }: AdminDeta
 
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-      <div className="bg-white w-full max-w-4xl rounded-lg shadow-xl p-8 relative flex flex-col">
+      <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-lg shadow-xl p-8 relative flex flex-col">
+
+        <div className="overflow-y-auto p-8">
         {/* Close Button */}
         <button onClick={onClose} className="absolute top-4 right-4">
           <X className="text-gray-500 hover:text-gray-700 w-6 h-6" />
@@ -194,7 +235,7 @@ const AdminDetails = ({ admin, onClose, onApprove, onApproveSuccess }: AdminDeta
             <div className="flex justify-between items-center">
               <span className="flex items-center gap-2">
                 <Building2 className="text-gray-600 w-4 h-4" />
-                <span className="font-semibold">Organization:</span>
+                <span className="font-semibold">Transport Cooperative:</span>
               </span>
               <span>{admin.organization}</span>
             </div>
@@ -205,6 +246,15 @@ const AdminDetails = ({ admin, onClose, onApprove, onApproveSuccess }: AdminDeta
               </span>
               <span>{admin.role}</span>
             </div>
+            {admin.role == 'admin-operator' && (
+            <div className="flex justify-between items-center">
+              <span className="flex items-center gap-2">
+                <Building2 className="text-gray-600 w-4 h-4" />
+                <span className="font-semibold">Operator Name:</span>
+              </span>
+              <span>{admin.operatorUnit}</span>
+            </div>
+            )}
           </div>
 
           {/* Date of Info */}
@@ -243,6 +293,38 @@ const AdminDetails = ({ admin, onClose, onApprove, onApproveSuccess }: AdminDeta
             </div>
           )}
 
+        {requirements.map((req) => (
+          <div key={req.id} className="flex flex-col border border-gray-200 rounded-md p-4 mb-4">
+            <label className="font-semibold text-gray-700 mb-2">{req.name}</label>
+            <input
+              type="file"
+              accept={
+                req.inputType === "image"
+                  ? "image/*"
+                  : req.inputType === "image/pdf"
+                  ? "image/*,application/pdf"
+                  : "*/*"
+              }
+              onChange={(e) => handleFileChange(req.id, e.target.files[0])}
+              className="border border-gray-300 rounded-md p-2"
+            />
+
+            {/* Preview */}
+            {filePreviews[req.id] && filePreviews[req.id].type === "image" && (
+              <img
+                src={filePreviews[req.id].url}
+                alt="Preview"
+                className="mt-2 w-32 h-32 object-cover rounded-md border"
+              />
+            )}
+            {filePreviews[req.id] && filePreviews[req.id].type === "pdf" && (
+              <div className="mt-2 flex items-center gap-2 text-sm text-gray-600">
+                📄 {filePreviews[req.id].name}
+              </div>
+            )}
+          </div>
+        ))}
+
           {/* Buttons */}
           <div className="flex justify-end space-x-2">
             {canEditAdmin() && (
@@ -267,6 +349,7 @@ const AdminDetails = ({ admin, onClose, onApprove, onApproveSuccess }: AdminDeta
               <span className="text-sm font-bold text-blue-700 tracking-wide">YOUR ACCOUNT</span>
             </div>
           )}
+        </div>
         </div>
       </div>
 

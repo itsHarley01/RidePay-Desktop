@@ -5,6 +5,7 @@ export interface TopUpPayload {
   topUpAmount: number;
   topUpFee: number;
   topupMethod: string;
+  organization: string;
 }
 
 export interface TopUpResponse {

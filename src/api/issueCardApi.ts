@@ -4,8 +4,10 @@ interface IssueCardPayload {
   tagUid: string
   userUid: string
   cardPrice: number
+  cardType: string
   cardIssuanceFee: number
   cardIssuanceLocation: string
+  organization: string
   amount: number // total amount (usually cardPrice + cardIssuanceFee)
 }
 

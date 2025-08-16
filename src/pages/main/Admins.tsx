@@ -2,9 +2,10 @@
 import { useState } from 'react';
 import AllAdmins from '../Admins/AllAdmins';
 import Organizations from '../Admins/Organizations';
+import AdminRequirements from '../Admins/AdminRequirements';
 
 const Admins = () => {
-  const [activeTab, setActiveTab] = useState<'all' | 'org'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'org' | 'requirements'>('all');
 
   return (
     <div className="p-6">
@@ -35,12 +36,22 @@ const Admins = () => {
           >
             Organizations
           </button>
+          <button
+            className={`pb-2 text-lg font-medium transition-all duration-200 ${
+              activeTab === 'requirements' ? 'text-[#0A2A54] border-b-4 border-yellow-400' : 'text-gray-500'
+            }`}
+            onClick={() => setActiveTab('requirements')}
+          >
+            Admin Requirements
+          </button>
         </div>
       </div>
 
       {/* Tab Content */}
       <div className="mt-6">
-        {activeTab === 'all' ? <AllAdmins /> : <Organizations />}
+        {activeTab === 'all' && <AllAdmins />}
+        {activeTab === 'org' && <Organizations />}
+        {activeTab === 'requirements' && <AdminRequirements />}
       </div>
     </div>
   );

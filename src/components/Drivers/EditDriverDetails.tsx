@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { getDriverDetails, updateDriverDetails } from '../../api/EditDriverApi';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Organizations from '../../pages/Admins/Organizations';
 
 export default function EditDriverDetails({
   onClose,
@@ -14,13 +15,6 @@ export default function EditDriverDetails({
   const [driverData, setDriverData] = useState<any>(null);
   const [formData, setFormData] = useState<any>({});
   const [loading, setLoading] = useState(true);
-
-  const organizationOptions = [
-    { label: 'Assign Later', value: 'Not yet assigned' },
-    { label: 'Organization 1', value: 'Organization 1' },
-    { label: 'Organization 2', value: 'Organization 2' },
-    { label: 'Organization 3', value: 'Organization 3' },
-  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -213,32 +207,34 @@ export default function EditDriverDetails({
             </div>
           </section>
 
-          {/* Organization and Bus */}
-          <section className="bg-gray-100 p-4 rounded-lg mb-6">
-            <h3 className="text-xl font-semibold text-[#0A2A54] mb-4">
-              Assignment
-            </h3>
-
-            <div className="flex gap-4">
-              <div className="w-1/2">
-                <label className="block font-medium">Assign Organization</label>
-                <select
-                  className="w-full border px-4 py-2 rounded"
-                  value={formData.organization || ''}
-                  onChange={(e) =>
-                    setFormData({ ...formData, organization: e.target.value })
-                  }
-                >
-                  <option value="">Select Organization</option>
-                  {organizationOptions.map((org) => (
-                    <option key={org.value} value={org.value}>
-                      {org.label}
-                    </option>
-                  ))}
-                </select>
+          {/* Organization and operator unit */}
+            <section className="bg-gray-100 p-4 rounded-lg mb-6">
+              <h3 className="text-xl font-semibold text-[#0A2A54] mb-4">Assignment</h3>
+              <div className="flex gap-4">
+                <div className="w-1/2">
+                  <label className="block font-medium">Transport Cooperative Name</label>
+                  <input
+                    type="text"
+                    className="w-full border px-4 py-2 rounded"
+                    value={formData.organization || ''}
+                    onChange={(e) =>
+                      setFormData({ ...formData, organization: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="w-1/2">
+                  <label className="block font-medium">Operator Name</label>
+                  <input
+                    type="text"
+                    className="w-full border px-4 py-2 rounded"
+                    value={formData.operatorUnit || ''}
+                    onChange={(e) =>
+                      setFormData({ ...formData, operatorUnit: e.target.value })
+                    }
+                  />
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
 
           <div className="pt-4">
             <button

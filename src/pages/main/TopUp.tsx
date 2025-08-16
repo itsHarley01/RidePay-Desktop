@@ -51,6 +51,7 @@ export default function TopUp() {
   const handleTopUp = async () => {
     if (!isFormValid) return;
     const amount = isCustom ? Number(customAmount) : selectedAmount;
+    const organization = localStorage.getItem('organization') || '';
 
     try {
       await topUpUserBalance({
@@ -58,6 +59,7 @@ export default function TopUp() {
         topUpAmount: amount!,
         topUpFee: 0,
         topupMethod: 'onsite',
+        organization: organization,
       });
 
       toast.success('Top-up successful!');
@@ -79,7 +81,7 @@ export default function TopUp() {
     <div className="p-6">
       <div>
         <h1 className="text-3xl font-bold text-[#0A2A54] relative inline-block pb-2">
-          TopUp
+          TopUp 
           <span className="absolute left-0 bottom-0 w-full h-1 bg-yellow-400 rounded"></span>
         </h1>
       </div>
@@ -143,7 +145,7 @@ export default function TopUp() {
                     : 'bg-white hover:bg-yellow-100 border-gray-300'
                 }`}
               >
-                ₱{amount}
+                ₱{amount} 
               </button>
             ))}
             <input

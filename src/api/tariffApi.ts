@@ -1,23 +1,26 @@
 import axiosInstance from './axiosInstance'
 
+// New distanceBased tariff type
 export interface DistanceBasedTariff {
   type: 'distanceBased'
-  minimumDistance: string
-  minimumFee: string
+  minimumFare: number // 2 decimals
+  succeedingDistance: number // 1 decimal
+  succeedingFare: number // 2 decimals
 }
 
 export interface FixedTariff {
   type: 'fixed'
-  minimumFee: string
+  minimumFee: number // 2 decimals
 }
 
 export type Tariff = {
   distanceBased?: {
-    minimumDistance: string
-    minimumFee: string
+    minimumFare: number
+    succeedingDistance: number
+    succeedingFare: number
   }
   fixed?: {
-    minimumFee: string
+    minimumFee: number
   }
 }
 
@@ -36,3 +39,16 @@ export const updateTariff = async (
   const response = await axiosInstance.put('/tariff', payload)
   return response.data
 }
+
+// PUT /api/tariff/fixedEnabled
+export const setFixedEnabled = async (enabled: boolean): Promise<{ message: string }> => {
+  const response = await axiosInstance.put('/tariff/set', { fixedEnabled: enabled })
+  return response.data
+}
+
+// GET /api/tariff/fixedEnabled
+export const getFixedEnabled = async (): Promise<{ fixedEnabled: boolean }> => {
+  const response = await axiosInstance.get<{ fixedEnabled: boolean }>('/tariff/set')
+  return response.data
+}
+
